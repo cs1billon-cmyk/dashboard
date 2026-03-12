@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Import Freight Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07111f;--bg2:#0d1e33;--bg3:#162c47;
+  --sea:#00d4b8;--sea2:rgba(0,212,184,.14);--sea3:rgba(0,212,184,.28);
+  --air:#f5a623;--air2:rgba(245,166,35,.14);--air3:rgba(245,166,35,.28);
+  --grn:#00e676;--grn2:rgba(0,230,118,.14);
+  --red:#ff4560;--red2:rgba(255,69,96,.14);
+  --pur:#9c6fef;--pur2:rgba(156,111,239,.14);--pur3:rgba(156,111,239,.28);
+  --blu:#4fc3f7;--blu2:rgba(79,195,247,.14);
+  --txt:#dde8f5;--t2:#6d85a0;--t3:#3a5068;--t4:#1e3550;
+  --bd:rgba(255,255,255,.06);--card:rgba(255,255,255,.035);--cardh:rgba(255,255,255,.06);
+  --mono:'IBM Plex Mono',monospace;--head:'Chakra Petch',sans-serif;--body:'Sarabun',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--body);background:var(--bg);color:var(--txt);display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 45% at 8% 0%,rgba(0,212,184,.07),transparent 55%),
+             radial-gradient(ellipse 50% 40% at 92% 100%,rgba(245,166,35,.06),transparent 55%);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,212,184,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,184,.015) 1px,transparent 1px);
+  background-size:48px 48px;}
+
+/* UPLOAD */
+#ov{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.uc{background:var(--bg2);border:1px solid var(--bd);border-radius:24px;padding:40px 50px;width:min(530px,94vw);box-shadow:0 32px 100px rgba(0,0,0,.6);text-align:center;position:relative;z-index:1;}
+.ui{font-size:52px;display:block;margin-bottom:12px;}
+.ut{font-family:var(--head);font-size:20px;font-weight:700;margin-bottom:5px;}
+.ut span{color:var(--sea);}
+.uinfo{text-align:left;background:rgba(0,212,184,.05);border:1px solid var(--sea3);border-radius:11px;padding:12px 15px;margin:14px 0;}
+.urow{font-size:11px;color:var(--t2);margin-bottom:3px;display:flex;gap:6px;}
+.urow:last-child{margin-bottom:0;}.udot{color:var(--sea);flex-shrink:0;}
+.uzone{background:var(--bg);border:1.5px dashed var(--sea3);border-radius:14px;padding:22px;margin:12px 0;cursor:pointer;transition:all .2s;}
+.uzone:hover,.uzone.drag{border-color:var(--sea);background:rgba(0,212,184,.04);}
+.uz-ic{font-size:28px;margin-bottom:6px;}.uz-tx{font-size:11.5px;color:var(--t2);line-height:1.6;}
+.uz-tx strong{color:var(--sea);}
+.ubtn{width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--sea),#009bcc);color:var(--bg);
+  font-weight:700;font-size:14px;font-family:var(--body);transition:all .2s;box-shadow:0 4px 24px rgba(0,212,184,.3);}
+.ubtn:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(0,212,184,.4);}
+.udemo{margin-top:10px;font-size:11.5px;color:var(--t3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.udemo:hover{color:var(--sea);}
+.uerr{font-size:11.5px;color:var(--red);margin-top:8px;display:none;padding:8px 12px;background:var(--red2);border-radius:8px;}
+#fin{display:none;}
+
+/* LOADING */
+#ld{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(7,17,31,.92);backdrop-filter:blur(12px);}
+.spin{width:40px;height:40px;border:3px solid rgba(0,212,184,.2);border-top-color:var(--sea);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* NAV */
+nav{position:relative;z-index:10;height:50px;flex-shrink:0;
+  background:rgba(7,17,31,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:0;}
+.brand{font-family:var(--head);font-size:12.5px;font-weight:700;letter-spacing:.05em;margin-right:20px;flex-shrink:0;display:flex;align-items:center;gap:7px;}
+.bdot{width:7px;height:7px;border-radius:50%;background:var(--sea);box-shadow:0 0 10px var(--sea);}
+.tabs{display:flex;gap:2px;flex:1;}
+.tab{padding:4px 13px;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--t2);
+  transition:all .18s;display:flex;align-items:center;gap:5px;border:1px solid transparent;white-space:nowrap;}
+.tab:hover{background:var(--cardh);color:var(--txt);}
+.tab.ta{background:var(--card);color:var(--txt);border-color:var(--bd);}
+.tab.ts{background:var(--sea2);color:var(--sea);border-color:var(--sea3);}
+.tab.tai{background:var(--air2);color:var(--air);border-color:var(--air3);}
+.tab.tp{background:var(--pur2);color:var(--pur);border-color:var(--pur3);}
+.tab.tb2{background:var(--blu2);color:var(--blu);border-color:rgba(79,195,247,.28);}
+.nbdg{font-size:9.5px;font-family:var(--mono);background:var(--red2);color:var(--red);padding:1px 5px;border-radius:4px;}
+.nr{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.chip{font-family:var(--mono);font-size:10px;color:var(--sea);padding:2px 8px;border-radius:5px;background:var(--sea2);border:1px solid var(--sea3);}
+.lpill{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2);}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.nbtn{padding:3px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:10.5px;font-family:var(--body);cursor:pointer;transition:all .18s;}
+.nbtn:hover{background:var(--cardh);color:var(--sea);}
+
+/* PAGES */
+.pg{display:none;flex:1;overflow-y:auto;position:relative;z-index:1;scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
+.pg.on{display:block;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+
+/* PAGE HEADER */
+.pghdr{padding:14px 20px 0;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px;}
+.pgm{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px;}
+.pgm.s{color:var(--sea);}.pgm.a{color:var(--air);}.pgm.w{color:var(--t2);}.pgm.p{color:var(--pur);}
+.pgt{font-family:var(--head);font-size:18px;font-weight:700;}
+.pgt .s{color:var(--sea);}.pgt .a{color:var(--air);}.pgt .p{color:var(--pur);}
+.fb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.fsel{padding:4px 9px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--t2);font-size:11px;font-family:var(--body);cursor:pointer;transition:all .18s;outline:none;}
+.fsel:hover,.fsel:focus{border-color:rgba(255,255,255,.14);color:var(--txt);}
+
+/* BODY */
+.pgb{padding:0 20px 26px;}
+.sec{display:flex;align-items:center;gap:8px;margin:12px 0 8px;}
+.pip{width:3px;height:12px;border-radius:2px;}
+.pip.s{background:var(--sea);box-shadow:0 0 7px var(--sea);}
+.pip.a{background:var(--air);box-shadow:0 0 7px var(--air);}
+.pip.p{background:var(--pur);box-shadow:0 0 7px var(--pur);}
+.pip.b{background:var(--blu);box-shadow:0 0 7px var(--blu);}
+.pip.w{background:var(--t2);}
+.slbl{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);}
+.sln{flex:1;height:1px;background:var(--bd);}
+.snote{font-size:9.5px;color:var(--t3);font-family:var(--mono);}
+
+/* KPI CARDS */
+.kg{display:grid;gap:8px;margin-bottom:8px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g5{grid-template-columns:repeat(5,1fr);}
+.g6{grid-template-columns:repeat(6,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.kc{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;position:relative;overflow:hidden;transition:all .18s;animation:fadeUp .25s ease both;}
+.kc:hover{background:var(--cardh);transform:translateY(-1px);}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:12px 12px 0 0;}
+.kcs::before{background:linear-gradient(90deg,var(--sea),transparent);}
+.kca::before{background:linear-gradient(90deg,var(--air),transparent);}
+.kcg::before{background:linear-gradient(90deg,var(--grn),transparent);}
+.kcr::before{background:linear-gradient(90deg,var(--red),transparent);}
+.kcp::before{background:linear-gradient(90deg,var(--pur),transparent);}
+.kcb::before{background:linear-gradient(90deg,var(--blu),transparent);}
+.kcw::before{background:linear-gradient(90deg,var(--t2),transparent);}
+.kl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:6px;}
+.kv{font-family:var(--mono);font-size:23px;font-weight:600;line-height:1;margin-bottom:4px;}
+.ku{font-size:10px;color:var(--t2);margin-left:2px;}
+.ks2{font-size:10px;}
+.up{color:var(--grn);}.dn{color:var(--red);}.ok{color:var(--sea);}.wn{color:var(--air);}.pp{color:var(--pur);}
+
+/* LAYOUTS */
+.r3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.r32{display:grid;grid-template-columns:3fr 2fr;gap:8px;margin-bottom:8px;}
+
+/* CHART CARD */
+.cc{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:13px;transition:border-color .18s;}
+.cc:hover{border-color:rgba(255,255,255,.1);}
+.cct{font-size:11.5px;font-weight:700;margin-bottom:2px;}
+.ccs{font-size:9.5px;color:var(--t2);margin-bottom:9px;}
+
+/* BAR CHARTS */
+.bch{height:80px;display:flex;align-items:flex-end;gap:3px;}
+.bar{flex:1;border-radius:3px 3px 0 0;opacity:.85;transition:opacity .18s;position:relative;cursor:default;}
+.bar:hover{opacity:1;}
+.bar:hover::after{content:attr(data-tip);position:absolute;bottom:106%;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.92);color:var(--txt);font-size:9px;padding:3px 7px;border-radius:4px;
+  white-space:nowrap;pointer-events:none;font-family:var(--mono);z-index:99;}
+.bs{background:linear-gradient(to top,rgba(0,212,184,.4),var(--sea));}
+.ba{background:linear-gradient(to top,rgba(245,166,35,.4),var(--air));}
+.bg{background:linear-gradient(to top,rgba(0,230,118,.35),var(--grn));}
+.br{background:linear-gradient(to top,rgba(255,69,96,.35),var(--red));}
+.bp{background:linear-gradient(to top,rgba(156,111,239,.35),var(--pur));}
+.bbl{background:linear-gradient(to top,rgba(79,195,247,.35),var(--blu));}
+.bgr{background:rgba(255,255,255,.1);}
+.bclbls{display:flex;margin-top:4px;}
+.bclbl{font-size:8.5px;color:var(--t3);font-family:var(--mono);flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.leg{display:flex;gap:9px;margin-top:6px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2);}
+.ld{width:6px;height:6px;border-radius:50%;}
+
+/* HBARS */
+.hbr{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.hbl{font-size:10px;color:var(--t2);width:110px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hbt{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+.hbf{height:100%;border-radius:3px;transition:width .4s ease;}
+.hbv{font-size:10px;font-family:var(--mono);color:var(--t2);width:90px;flex-shrink:0;}
+
+/* SVG CHARTS */
+.dw{display:flex;flex-direction:column;align-items:center;justify-content:center;height:108px;}
+.gw{display:flex;flex-direction:column;align-items:center;justify-content:center;height:108px;}
+
+/* HERO */
+.hero{margin:12px 20px 0;
+  background:linear-gradient(135deg,rgba(0,212,184,.07) 0%,rgba(7,17,31,0) 50%,rgba(245,166,35,.05) 100%);
+  border:1px solid var(--bd);border-radius:15px;padding:14px 20px;
+  display:flex;justify-content:space-between;align-items:center;}
+.hl{font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:2px;}
+.ht{font-family:var(--head);font-size:17px;font-weight:700;}
+.ht span{color:var(--sea);}
+.hs2{font-size:11px;color:var(--t2);margin-top:2px;}
+.hst{display:flex;gap:14px;}
+.hsi{text-align:center;}
+.hsv{font-family:var(--mono);font-size:18px;font-weight:600;}
+.hss{font-size:8.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+
+/* VS STRIP */
+.vs{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:11px 16px;display:flex;align-items:center;margin-bottom:8px;}
+.vss{flex:1;padding:0 12px;}.vss:first-child{padding-left:0;}.vss:last-child{padding-right:0;}
+.vsm{font-size:8.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:4px;}
+.vsm.s{color:var(--sea);}.vsm.a{color:var(--air);}
+.vsit{display:flex;gap:12px;flex-wrap:wrap;}
+.vsi{text-align:center;}
+.vsv{font-family:var(--mono);font-size:14px;font-weight:600;}
+.vsl{font-size:8.5px;color:var(--t3);margin-top:2px;}
+.vsd{width:1px;background:var(--bd);align-self:stretch;}
+.vsv2{padding:0 10px;font-family:var(--head);font-size:10.5px;color:var(--t3);font-weight:700;}
+
+/* TABLE */
+.tc{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:8px;}
+.ttop{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;border-bottom:1px solid var(--bd);}
+.tt{font-size:12.5px;font-weight:700;}
+.tm{font-size:10px;color:var(--t2);margin-top:1px;}
+.tact{display:flex;gap:6px;align-items:center;}
+.btn{padding:3px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:10px;font-family:var(--body);cursor:pointer;transition:all .18s;}
+.btn:hover{background:var(--cardh);color:var(--txt);}
+.bts{background:var(--sea2);border-color:var(--sea3);color:var(--sea);}
+.bta{background:var(--air2);border-color:var(--air3);color:var(--air);}
+.btp{background:var(--pur2);border-color:var(--pur3);color:var(--pur);}
+.tw{overflow-x:auto;max-height:280px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;min-width:900px;}
+thead th{padding:6px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--t3);background:rgba(0,0,0,.22);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:1;white-space:nowrap;}
+tbody td{padding:7px 10px;font-size:10.5px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,.022);}
+tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--txt);}
+tbody tr:last-child td{border-bottom:none;}
+.mono{font-family:var(--mono);font-size:10px;}
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:9.5px;font-weight:600;}
+.bdd{width:3.5px;height:3.5px;border-radius:50%;background:currentColor;}
+.bgg{background:rgba(0,230,118,.1);color:var(--grn);}
+.brr{background:rgba(255,69,96,.1);color:var(--red);}
+.bss{background:var(--sea2);color:var(--sea);}
+.baa{background:var(--air2);color:var(--air);}
+.bpp{background:var(--pur2);color:var(--pur);}
+.bww{background:rgba(255,255,255,.06);color:var(--t2);}
+.bor{background:rgba(255,165,0,.12);color:#ffaa00;}
+.mtg{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;font-family:var(--mono);}
+.mts{background:var(--sea2);color:var(--sea);}
+.mta{background:var(--air2);color:var(--air);}
+.chk{color:var(--grn);}.nchk{color:var(--t4);}
+.inv-txt{font-family:var(--mono);font-size:9px;color:var(--t2);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+
+/* ALERT */
+.alert{background:rgba(255,69,96,.07);border:1px solid rgba(255,69,96,.22);border-radius:9px;padding:9px 13px;margin-bottom:7px;display:flex;align-items:flex-start;gap:9px;}
+.alert-ic{font-size:15px;flex-shrink:0;margin-top:1px;}
+.alert-tx{font-size:11px;color:var(--txt);flex:1;}
+.alert-sub{font-size:10px;color:var(--t2);margin-top:2px;}
+
+/* BILLING SPECIFIC */
+.bill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+.bill-stat-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.05);margin-top:6px;}
+.bill-stat-fill{height:100%;border-radius:3px;}
+.amt-lbl{font-size:9px;color:var(--t3);margin-bottom:3px;}
+.amt-val{font-family:var(--mono);font-size:18px;font-weight:600;}
+.amt-sub{font-size:9.5px;color:var(--t2);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- UPLOAD -->
+<div id="ov">
+  <div class="uc">
+    <span class="ui">📦</span>
+    <div class="ut">CS Import Freight <span>Dashboard</span></div>
+    <div class="uinfo">
+      <div class="urow"><span class="udot">✦</span>รองรับ REPORT_SHIPMENT_FREIGHT_2026.xlsx (ทุก version)</div>
+      <div class="urow"><span class="udot">✦</span>OTD คำนวณ ETA vs ATA · Response: RCV→CLEAR</div>
+      <div class="urow"><span class="udot">✦</span>Job Status "จบงานแล้ว" ตรวจจาก Remarks อัตโนมัติ</div>
+      <div class="urow"><span class="udot">✦</span>รองรับ INV./B/L · Billing (ถ้าใช้ไฟล์ Enhanced)</div>
+    </div>
+    <div class="uzone" id="uz" onclick="document.getElementById('fin').click()">
+      <div class="uz-ic">📂</div>
+      <div class="uz-tx">คลิกหรือลากไฟล์มาวางที่นี่<br><strong>REPORT_SHIPMENT_FREIGHT_2026_enhanced.xlsx</strong></div>
+    </div>
+    <button class="ubtn" onclick="document.getElementById('fin').click()">📂 เลือกไฟล์ Excel</button>
+    <input type="file" id="fin" accept=".xlsx,.xls" onchange="loadFile(event)">
+    <div class="uerr" id="uerr"></div>
+    <div class="udemo" onclick="loadDemo()">ดู Demo ด้วยข้อมูลตัวอย่าง</div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="ld"><div class="spin"></div><div style="font-size:12px;color:var(--t2)">กำลังประมวลผล...</div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="brand"><div class="bdot"></div>CS Import 2026</div>
+  <div class="tabs">
+    <div class="tab ta" onclick="goPage('sum',this)">🏠 Summary</div>
+    <div class="tab" onclick="goPage('sea',this)">🚢 Sea</div>
+    <div class="tab" onclick="goPage('air',this)">✈️ Air <span class="nbdg" id="air-bdg"></span></div>
+    <div class="tab" onclick="goPage('cn',this)">🏢 Consignee</div>
+    <div class="tab" onclick="goPage('billing',this)">💰 Billing</div>
+    <div class="tab" onclick="goPage('alert',this)">🚨 Alerts <span class="nbdg" id="al-bdg"></span></div>
+  </div>
+  <div class="nr">
+    <div class="chip" id="chip">—</div>
+    <div class="lpill"><div class="ldot"></div>Live</div>
+    <button class="nbtn" onclick="document.getElementById('fin').click()">📂 โหลดใหม่</button>
+  </div>
+</nav>
+
+<!-- SUMMARY -->
+<div class="pg on" id="pg-sum">
+  <div class="hero">
+    <div>
+      <div class="hl">CS Operations · Freight Report 2026</div>
+      <div class="ht">Import <span>Sea & Air</span> Dashboard</div>
+      <div class="hs2" id="h-sub">กรุณาอัปโหลดไฟล์ Excel เพื่อเริ่มต้น</div>
+    </div>
+    <div class="hst">
+      <div class="hsi"><div class="hsv" id="h-tot" style="color:var(--sea)">—</div><div class="hss">Total</div></div>
+      <div class="hsi"><div class="hsv" id="h-otd" style="color:var(--grn)">—</div><div class="hss">OTD</div></div>
+      <div class="hsi"><div class="hsv" id="h-done" style="color:var(--pur)">—</div><div class="hss">จบงาน</div></div>
+      <div class="hsi"><div class="hsv" id="h-it" style="color:var(--air)">—</div><div class="hss">In Transit</div></div>
+      <div class="hsi"><div class="hsv" id="h-dl" style="color:var(--red)">—</div><div class="hss">Delayed</div></div>
+    </div>
+  </div>
+  <div class="pgb">
+    <div class="sec"><div class="pip s"></div><div class="slbl">Sea vs Air</div><div class="sln"></div></div>
+    <div class="vs" id="vs"></div>
+    <div class="sec"><div class="pip s"></div><div class="slbl">KPI รวม</div><div class="sln"></div></div>
+    <div class="kg g5" id="sum-kpi"></div>
+    <div class="r3" id="sum-ch1"></div>
+    <div class="r2" id="sum-ch2"></div>
+  </div>
+</div>
+
+<!-- SEA -->
+<div class="pg" id="pg-sea">
+  <div class="pghdr">
+    <div><div class="pgm s">🚢 Sea Import</div><div class="pgt">Sea <span class="s">Dashboard</span></div></div>
+    <div class="fb">
+      <select class="fsel" id="sf-sh" onchange="renderSea()"><option value="">📋 ทุก Sheet</option></select>
+      <select class="fsel" id="sf-cn" onchange="renderSea()"><option value="">🏢 ทุก Consignee</option></select>
+      <select class="fsel" id="sf-pv" onchange="renderSea()"><option value="">🎖️ ทุก Privilege</option></select>
+      <select class="fsel" id="sf-fc" onchange="renderSea()"><option value="">📦 FCL/LCL</option></select>
+      <select class="fsel" id="sf-js" onchange="renderSea()"><option value="">✔️ ทุก Status</option><option value="จบงานแล้ว">จบงานแล้ว</option><option value="In Transit">In Transit</option><option value="On Time">On Time</option><option value="Delayed">Delayed</option></select>
+    </div>
+  </div>
+  <div class="pgb">
+    <div class="sec"><div class="pip s"></div><div class="slbl">Sea KPIs</div><div class="sln"></div><div class="snote" id="sea-n"></div></div>
+    <div class="kg g6" id="sea-kpi"></div>
+    <div class="r3" id="sea-ch1"></div>
+    <div class="r2" id="sea-ch2"></div>
+    <div class="sec"><div class="pip s"></div><div class="slbl">รายการ Sea</div><div class="sln"></div><div class="snote" id="sea-tn"></div></div>
+    <div class="tc">
+      <div class="ttop"><div><div class="tt">🚢 Sea Shipment Cases</div><div class="tm">พร้อม INV./B/L และ Job Status</div></div>
+        <div class="tact"><button class="btn bts" onclick="exportCSV('SEA')">Export CSV ↓</button></div></div>
+      <div class="tw"><table><thead><tr>
+        <th>Sheet</th><th>Consignee</th><th>Shipper</th><th>POL→POD</th><th>FCL</th>
+        <th>ETD</th><th>ETA</th><th>ATA</th><th>Vessel</th>
+        <th>INV./B/L</th><th>Privilege</th>
+        <th>RCV</th><th>Clear</th><th>OTD</th><th>Job</th><th>Resp</th><th>Delay</th><th>F</th><th>S</th><th>Remarks</th>
+      </tr></thead><tbody id="sea-tb"></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- AIR -->
+<div class="pg" id="pg-air">
+  <div class="pghdr">
+    <div><div class="pgm a">✈️ Air Import</div><div class="pgt">Air <span class="a">Dashboard</span></div></div>
+    <div class="fb">
+      <select class="fsel" id="af-sh" onchange="renderAir()"><option value="">📋 ทุก Sheet</option></select>
+      <select class="fsel" id="af-cn" onchange="renderAir()"><option value="">🏢 ทุก Consignee</option></select>
+      <select class="fsel" id="af-pv" onchange="renderAir()"><option value="">🎖️ ทุก Privilege</option></select>
+      <select class="fsel" id="af-js" onchange="renderAir()"><option value="">✔️ ทุก Status</option><option value="จบงานแล้ว">จบงานแล้ว</option><option value="In Transit">In Transit</option><option value="On Time">On Time</option><option value="Delayed">Delayed</option></select>
+    </div>
+  </div>
+  <div class="pgb">
+    <div class="sec"><div class="pip a"></div><div class="slbl">Air KPIs</div><div class="sln"></div><div class="snote" id="air-n"></div></div>
+    <div class="kg g6" id="air-kpi"></div>
+    <div class="r3" id="air-ch1"></div>
+    <div class="r2" id="air-ch2"></div>
+    <div class="sec"><div class="pip a"></div><div class="slbl">รายการ Air</div><div class="sln"></div><div class="snote" id="air-tn"></div></div>
+    <div class="tc">
+      <div class="ttop"><div><div class="tt">✈️ Air Shipment Cases</div><div class="tm">พร้อม INV./MAWB และ Job Status</div></div>
+        <div class="tact">
+          <span class="btn bta" id="dl-btn" style="display:none"></span>
+          <button class="btn bta" onclick="exportCSV('AIR')">Export CSV ↓</button>
+        </div></div>
+      <div class="tw"><table><thead><tr>
+        <th>Sheet</th><th>Consignee</th><th>Shipper</th><th>POL→POD</th>
+        <th>ETD</th><th>ETA/ATA</th><th>Flight</th>
+        <th>INV./MAWB</th><th>Privilege</th>
+        <th>RCV</th><th>Clear</th><th>OTD</th><th>Job</th><th>Resp</th><th>Delay</th><th>F</th><th>S</th><th>Remarks</th>
+      </tr></thead><tbody id="air-tb"></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- CONSIGNEE -->
+<div class="pg" id="pg-cn">
+  <div class="pghdr">
+    <div><div class="pgm w">🏢 Consignee View</div><div class="pgt">Volume & OTD <span class="s">by Consignee</span></div></div>
+    <div class="fb"><select class="fsel" id="cf-sel" onchange="renderCN()"><option value="">🏢 เลือก Consignee</option></select></div>
+  </div>
+  <div class="pgb">
+    <div class="sec"><div class="pip s"></div><div class="slbl">Volume Ranking</div><div class="sln"></div></div>
+    <div class="r2" id="cn-rank"></div>
+    <div class="sec"><div class="pip s"></div><div class="slbl">รายละเอียด</div><div class="sln"></div></div>
+    <div class="kg g4" id="cn-kpi"></div>
+    <div class="tc" style="margin-top:8px">
+      <div class="ttop"><div><div class="tt" id="cn-title">เลือก Consignee ด้านบน</div></div></div>
+      <div class="tw"><table><thead><tr>
+        <th>Sheet</th><th>Mode</th><th>Shipper</th><th>POL→POD</th><th>FCL</th>
+        <th>ETD</th><th>ETA/ATA</th><th>INV./B/L</th><th>Privilege</th>
+        <th>OTD</th><th>Job</th><th>Resp</th><th>Delay</th><th>Remarks</th>
+      </tr></thead><tbody id="cn-tb"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- BILLING -->
+<div class="pg" id="pg-billing">
+  <div class="pghdr">
+    <div><div class="pgm p">💰 Billing</div><div class="pgt">ติดตาม <span class="p">การเรียกเก็บ</span></div></div>
+    <div class="fb">
+      <select class="fsel" id="bf-sh" onchange="renderBilling()"><option value="">📋 ทุก Sheet</option></select>
+      <select class="fsel" id="bf-cn" onchange="renderBilling()"><option value="">🏢 ทุก Consignee</option></select>
+      <select class="fsel" id="bf-st" onchange="renderBilling()">
+        <option value="">💳 ทุก Status</option>
+        <option value="Paid">✅ Paid</option>
+        <option value="Unpaid">❌ Unpaid</option>
+        <option value="Pending">⏳ Pending</option>
+      </select>
+    </div>
+  </div>
+  <div class="pgb">
+    <div class="sec"><div class="pip p"></div><div class="slbl">Billing Overview</div><div class="sln"></div><div class="snote" id="bill-n"></div></div>
+    <div class="kg g4" id="bill-kpi"></div>
+    <div class="r2" id="bill-charts"></div>
+    <div class="sec"><div class="pip p"></div><div class="slbl">รายการ Billing</div><div class="sln"></div></div>
+    <div class="tc">
+      <div class="ttop"><div><div class="tt">💰 Billing Cases</div><div class="tm" id="bill-tm">รายการที่มีข้อมูล Billing</div></div>
+        <div class="tact"><button class="btn btp" onclick="exportBillingCSV()">Export CSV ↓</button></div></div>
+      <div class="tw"><table><thead><tr>
+        <th>Sheet</th><th>Mode</th><th>Consignee</th><th>INV./B/L</th><th>Vessel/Flight</th>
+        <th>Billing Date</th><th>Billing No.</th><th>Amount (THB)</th><th>Status</th><th>Remarks</th>
+      </tr></thead><tbody id="bill-tb"></tbody></table></div></div>
+    <div style="margin-top:10px;padding:12px;background:var(--pur2);border:1px solid var(--pur3);border-radius:10px;font-size:11px;color:var(--pur)">
+      <strong>📌 วิธีใส่ Billing:</strong> เปิดไฟล์ <strong>REPORT_enhanced.xlsx</strong> → กรอก BILLING DATE / BILLING NO. / BILLING AMT (THB) / BILLING STATUS (Paid/Unpaid/Pending) → บันทึก → โหลดไฟล์ใหม่ใน Dashboard นี้
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="pg" id="pg-alert">
+  <div class="pghdr">
+    <div><div class="pgm w">🚨 Alert Center</div><div class="pgt">Cases ที่ <span class="s">ต้องติดตาม</span></div></div>
+  </div>
+  <div class="pgb" id="alert-body"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let SEA=[], AIR=[];
+
+// ═══════════════════════════════════════
+// DONE KEYWORDS (sync with Excel)
+// ═══════════════════════════════════════
+const DONE_KW = [
+  'เคลียร์สินค้าและจัดส่งสินค้าแล้ว',
+  'เคลียร์สินค้าเรียบร้อย',
+  'เคลียร์สินค้าและจัดส่งแล้ว',
+  'จัดส่งสินค้าแล้ว',
+];
+const isDone = rem => DONE_KW.some(k => rem && rem.includes(k));
+
+// ═══════════════════════════════════════
+// EXCEL PARSER
+// ═══════════════════════════════════════
+function loadFile(ev){
+  const file=ev.target.files[0]; if(!file)return;
+  document.getElementById('ld').style.display='flex';
+  document.getElementById('uerr').style.display='none';
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+      SEA=[]; AIR=[];
+      for(const sn of wb.SheetNames){
+        const up=sn.toUpperCase().replace(/[\s\-]/g,'');
+        const isSea=up.includes('SEA'), isAir=up.includes('AIR');
+        if(!isSea&&!isAir) continue;
+        const rows=parseSheet(wb.Sheets[sn], sn.trim(), isSea?'SEA':'AIR');
+        if(isSea) SEA.push(...rows);
+        else AIR.push(...rows);
+      }
+      if(!SEA.length&&!AIR.length) throw new Error('ไม่พบข้อมูล — Sheet ต้องมีชื่อ SEA หรือ AIR');
+      done([...new Set([...SEA,...AIR].map(r=>r.sheet))]);
+    }catch(err){
+      document.getElementById('ld').style.display='none';
+      const el=document.getElementById('uerr');
+      el.style.display='block'; el.textContent='❌ '+err.message;
+    }
+  };
+  rd.readAsBinaryString(file);
+  ev.target.value='';
+}
+
+function parseSheet(ws, sheetName, mode){
+  const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+  let hi=-1;
+  for(let i=0;i<Math.min(raw.length,4);i++){
+    if(raw[i].some(c=>String(c).trim().toUpperCase()==='CONSIGNEE')){hi=i;break;}
+  }
+  if(hi<0) return [];
+  const hdrs=raw[hi].map(h=>String(h||'').trim().toUpperCase().replace(/\s+/g,' '));
+
+  const AL={
+    CONSIGNEE:['CONSIGNEE'],SHIPPER:['SHIPPER'],POL:['POL'],POD:['POD'],
+    TERM:['TERM'],AGENT:['AGENT ','AGENT'],
+    ETD:['ETD'],ETA:['ETA'],ATA:['ATA'],
+    FCL:['FCL/LCL'],
+    VESSEL:['OCEAN VESSEL / FLIGHT','VESSEL / VOYAGE','OCEAN VESSEL / FLIGH'],
+    INV:['INV. / B/L','INV / B/L','INV / MAWB','INV. / B/L'],
+    PRIVILEGE:['PREVILLAGE','PRIVILEGE'],
+    RCV:['RCV F/E/AK/BOI ','RCV F/E/AK/BOI','RCV DOC'],
+    CLEAR:['CLEAR'],DELIVERY:['DELIVERY'],REMARKS:['REMARKS'],
+    F:['F'],S:['S'],NOTE:['NOTE'],
+    QTY:["Q'TY","QTY"],GW:['G.W./C.W.'],CBM:['CBM/ CTNR','CBM/CTNR'],
+    // Enhanced KPI cols
+    OTD_COL:['OTD STATUS ✦','OTD_STATUS'],
+    RESP_COL:['RESP DAYS ✦','RESP_DAYS'],
+    DELAY_COL:['DELAY DAYS ✦','DELAY_DAYS'],
+    JOB_COL:['JOB STATUS ✦','JOB_STATUS'],
+    // Billing cols
+    BILL_DATE:['BILLING DATE','BILLING\nDATE'],
+    BILL_NO:['BILLING NO.'],
+    BILL_AMT:['BILLING AMT\n(THB)','BILLING AMT (THB)','BILLING AMT'],
+    BILL_STAT:['BILLING STATUS','BILLING\nSTATUS'],
+  };
+  const ci=key=>{
+    for(const a of(AL[key]||[key])){
+      const idx=hdrs.findIndex(h=>h===a.toUpperCase().replace(/\s+/g,' ').trim());
+      if(idx>=0) return idx;
+    }
+    return -1;
+  };
+
+  const toDate=v=>{
+    if(!v||v===''||v==='-'||v==='TBA') return null;
+    if(v instanceof Date) return v;
+    try{const d=new Date(String(v).trim());return isNaN(d)?null:d;}catch{return null;}
+  };
+  const fmtD=v=>{
+    const d=toDate(v); if(!d) return '';
+    return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+  };
+  const monthOf=v=>{
+    const d=toDate(v); if(!d) return '';
+    return d.toLocaleString('en-US',{month:'long'});
+  };
+  const gv=(row,key)=>{const i=ci(key);return i>=0&&i<row.length?row[i]:'';}
+  const gt=(row,key)=>String(gv(row,key)||'').trim();
+
+  const rows=[];
+  for(const row of raw.slice(hi+1)){
+    const cn=gt(row,'CONSIGNEE');
+    if(!cn||cn.match(/^=|^NO\./i)||cn==='-') continue;
+
+    const etdRaw=gv(row,'ETD'),etaRaw=gv(row,'ETA'),ataRaw=gv(row,'ATA');
+    const rcvRaw=gv(row,'RCV'),clrRaw=gv(row,'CLEAR');
+    const etaDt=toDate(etaRaw),ataDt=toDate(ataRaw);
+    const rcvDt=toDate(rcvRaw),clrDt=toDate(clrRaw);
+    const remarks=gt(row,'REMARKS');
+
+    // JOB STATUS — from enhanced col or from remarks
+    let jobStatus=gt(row,'JOB_COL');
+    if(!jobStatus) jobStatus = isDone(remarks) ? 'จบงานแล้ว' : '';
+
+    // OTD
+    let otd=gt(row,'OTD_COL');
+    if(jobStatus==='จบงานแล้ว'){
+      otd='จบงานแล้ว';
+    } else if(!otd||!['On Time','Delayed','In Transit','จบงานแล้ว'].includes(otd)){
+      const arrDt=ataDt||(mode==='AIR'?etaDt:null);
+      if(!arrDt) otd='In Transit';
+      else otd=arrDt<=etaDt?'On Time':'Delayed';
+    }
+
+    // RESP
+    let resp=gv(row,'RESP_COL');
+    if(resp===''||resp===null||resp===undefined){
+      resp=(rcvDt&&clrDt)?Math.round((clrDt-rcvDt)/86400000):'';
+    } else {resp=parseInt(resp);if(isNaN(resp))resp='';}
+
+    // DELAY
+    let delay=gv(row,'DELAY_COL');
+    if(delay===''||delay===null||delay===undefined){
+      delay=(etaDt&&ataDt)?Math.max(0,Math.round((ataDt-etaDt)/86400000)):'';
+    } else {delay=parseInt(delay);if(isNaN(delay))delay='';}
+
+    // Billing
+    const billDate=fmtD(gv(row,'BILL_DATE'));
+    const billNo=gt(row,'BILL_NO');
+    const billAmt=gv(row,'BILL_AMT');
+    const billAmtN=billAmt!==''&&!isNaN(parseFloat(billAmt))?parseFloat(billAmt):null;
+    const billStat=gt(row,'BILL_STAT');
+    const hasBilling=!!(billDate||billNo||billAmtN||billStat);
+
+    rows.push({
+      sheet:sheetName, mode,
+      consignee:cn.replace(/\u200b/g,'').trim(),
+      shipper:gt(row,'SHIPPER').replace(/\u200b/g,'').trim(),
+      pol:gt(row,'POL'), pod:gt(row,'POD'),
+      term:gt(row,'TERM'), agent:gt(row,'AGENT'),
+      fcl:gt(row,'FCL'),
+      etd:fmtD(etdRaw), eta:fmtD(etaRaw), ata:fmtD(ataRaw),
+      vessel:gt(row,'VESSEL'),
+      inv:gt(row,'INV'),
+      privilege:gt(row,'PRIVILEGE'),
+      rcv:fmtD(rcvRaw), clear:fmtD(clrRaw),
+      qty:gt(row,'QTY'), gw:gt(row,'GW'), cbm:gt(row,'CBM'),
+      delivery:fmtD(gv(row,'DELIVERY')),
+      otd, jobStatus, resp, delay,
+      f:gv(row,'F'), s:gv(row,'S'), remarks,
+      month:monthOf(etdRaw||etaRaw),
+      // billing
+      billDate, billNo, billAmt:billAmtN, billStat, hasBilling,
+    });
+  }
+  return rows;
+}
+
+function done(sheets){
+  document.getElementById('ld').style.display='none';
+  document.getElementById('ov').style.display='none';
+  document.getElementById('chip').textContent=sheets.join(' · ');
+  const all=[...SEA,...AIR];
+  document.getElementById('h-sub').textContent=`Sea ${SEA.length} · Air ${AIR.length} cases จาก ${sheets.length} Sheet`;
+  initFilters(); renderAll();
+}
+
+// ═══════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════
+function loadDemo(){
+  SEA=[
+    {sheet:'FEB-SEA',mode:'SEA',consignee:'HAM HEART',shipper:'SHT ELECTRONICS',pol:'SHENZHEN',pod:'BKK',fcl:'LCL',etd:'10-Feb-26',eta:'14-Feb-26',ata:'18-Feb-26',vessel:'SKY CHALLENGE|2601S',inv:'SHT-20260105|ECJPLCL260100398',privilege:'DUTY',rcv:'10-Feb-26',clear:'18-Feb-26',otd:'Delayed',jobStatus:'จบงานแล้ว',resp:8,delay:4,f:true,s:true,remarks:'เคลียร์สินค้าเรียบร้อย',month:'February',hasBilling:true,billDate:'20-Feb-26',billNo:'INV-2026-001',billAmt:18500,billStat:'Paid'},
+    {sheet:'FEB-SEA',mode:'SEA',consignee:'HAM HEART',shipper:'MATH MARK FUJIAN',pol:'SHENZHEN',pod:'BKK',fcl:'LCL',etd:'29-Jan-26',eta:'06-Feb-26',ata:'06-Feb-26',vessel:'WAN HAI 276|S055',inv:'20260105|ECJPLCL260100219',privilege:'DUTY',rcv:'29-Jan-26',clear:'06-Feb-26',otd:'On Time',jobStatus:'จบงานแล้ว',resp:8,delay:0,f:true,s:true,remarks:'เคลียร์สินค้าเรียบร้อย',month:'February',hasBilling:true,billDate:'08-Feb-26',billNo:'INV-2026-002',billAmt:15200,billStat:'Paid'},
+    {sheet:'FEB-SEA',mode:'SEA',consignee:'DAO COFFEE BEANS',shipper:'YIWU QIANNUO',pol:'SHENZHEN',pod:'BKK',fcl:'LCL',etd:'19-Feb-26',eta:'',ata:'',vessel:'ANBIEN SKY|S025',inv:'PI20260105A01|ECJPLCL260100358',privilege:'FORM E',rcv:'',clear:'',otd:'In Transit',jobStatus:'',resp:'',delay:'',f:true,s:true,remarks:'ได้ copy form e แล้ว',month:'February',hasBilling:false,billDate:'',billNo:'',billAmt:null,billStat:''},
+    {sheet:'MAR-SEA',mode:'SEA',consignee:'IDEA MATTER',shipper:'NEOPHARM',pol:'BUSAN',pod:'BKK',fcl:'LCL',etd:'26-Feb-26',eta:'03-Mar-26',ata:'',vessel:'SKY ORION|2603S',inv:'APIL.2026.0115|HASLK01251106895',privilege:'',rcv:'',clear:'',otd:'In Transit',jobStatus:'',resp:'',delay:'',f:true,s:true,remarks:'รอเรือเข้า',month:'March',hasBilling:false,billDate:'',billNo:'',billAmt:null,billStat:''},
+    {sheet:'MAR-SEA',mode:'SEA',consignee:'PATHONG',shipper:'RAMCIDES',pol:'KATTUPALLI',pod:'LCB',fcl:"40'HQ",etd:'25-Feb-26',eta:'05-Mar-26',ata:'07-Mar-26',vessel:'DAPHNE|0886E',inv:'CWY2260209-1|NBQF26030006',privilege:'DUTY',rcv:'05-Mar-26',clear:'05-Mar-26',otd:'Delayed',jobStatus:'จบงานแล้ว',resp:0,delay:2,f:false,s:false,remarks:'เคลียร์สินค้าและจัดส่งสินค้าแล้ว',month:'March',hasBilling:true,billDate:'10-Mar-26',billNo:'INV-2026-005',billAmt:22000,billStat:'Unpaid'},
+    {sheet:'MAR-SEA',mode:'SEA',consignee:'SIAM NP',shipper:'SINO MATERIALS',pol:'TIANJIN',pod:'LCB',fcl:'FCL',etd:'01-Mar-26',eta:'15-Mar-26',ata:'15-Mar-26',vessel:'EVER GLORY|0310W',inv:'LC-IM-20260210|',privilege:'FORM D',rcv:'15-Mar-26',clear:'17-Mar-26',otd:'On Time',jobStatus:'จบงานแล้ว',resp:2,delay:0,f:true,s:true,remarks:'เคลียร์สินค้าเรียบร้อย',month:'March',hasBilling:true,billDate:'18-Mar-26',billNo:'INV-2026-006',billAmt:9800,billStat:'Pending'},
+  ];
+  AIR=[
+    {sheet:'FEB-AIR',mode:'AIR',consignee:'ENDO',shipper:'ZHONGSHAN OJA',pol:'SZX',pod:'BKK',fcl:'',etd:'01-Feb-26',eta:'01-Feb-26',ata:'01-Feb-26',vessel:'ZH305',inv:'OJA-PI-260130|OJA-PI-260130-1',privilege:'BOI',rcv:'02-Feb-26',clear:'04-Feb-26',otd:'On Time',jobStatus:'จบงานแล้ว',resp:2,delay:0,f:true,s:true,remarks:'เคลียร์สินค้าและจัดส่งสินค้าแล้ว',month:'February',hasBilling:true,billDate:'05-Feb-26',billNo:'AIR-2026-001',billAmt:5500,billStat:'Paid'},
+    {sheet:'FEB-AIR',mode:'AIR',consignee:'DAO COFFEE',shipper:'TYX TRADING',pol:'SZX',pod:'BKK',fcl:'',etd:'09-Feb-26',eta:'09-Feb-26',ata:'09-Feb-26',vessel:'8K202',inv:'TXY20251225-04|NBXCL2602009',privilege:'FORM E',rcv:'11-Feb-26',clear:'14-Feb-26',otd:'On Time',jobStatus:'จบงานแล้ว',resp:3,delay:0,f:true,s:true,remarks:'เคลียร์สินค้าและจัดส่งสินค้าแล้ว',month:'February',hasBilling:true,billDate:'15-Feb-26',billNo:'AIR-2026-002',billAmt:4200,billStat:'Paid'},
+    {sheet:'FEB-AIR',mode:'AIR',consignee:'LITE-ON',shipper:'LITE-ON TECH',pol:'TPE',pod:'BKK',fcl:'',etd:'15-Feb-26',eta:'15-Feb-26',ata:'17-Feb-26',vessel:'CI8341',inv:'YC251120|NBXCL2602034',privilege:'DUTY',rcv:'17-Feb-26',clear:'19-Feb-26',otd:'Delayed',jobStatus:'จบงานแล้ว',resp:2,delay:2,f:true,s:true,remarks:'เคลียร์สินค้าและจัดส่งสินค้าแล้ว',month:'February',hasBilling:true,billDate:'20-Feb-26',billNo:'AIR-2026-003',billAmt:7800,billStat:'Unpaid'},
+    {sheet:'MAR-AIR',mode:'AIR',consignee:'ENDO',shipper:'KUNSHAN',pol:'SHA',pod:'BKK',fcl:'',etd:'05-Mar-26',eta:'05-Mar-26',ata:'05-Mar-26',vessel:'MU541',inv:'KT-2306|LPL2603003A',privilege:'BOI',rcv:'',clear:'',otd:'In Transit',jobStatus:'',resp:'',delay:0,f:false,s:false,remarks:'แพมซื้อประกันแล้ว',month:'March',hasBilling:false,billDate:'',billNo:'',billAmt:null,billStat:''},
+    {sheet:'MAR-AIR',mode:'AIR',consignee:'FUTURE',shipper:'FUTURE TECH SH',pol:'PVG',pod:'BKK',fcl:'',etd:'08-Mar-26',eta:'08-Mar-26',ata:'',vessel:'',inv:'HCL-26-0301|LPL2603002',privilege:'DUTY',rcv:'',clear:'',otd:'In Transit',jobStatus:'',resp:'',delay:'',f:false,s:false,remarks:'รอเคลียร์สินค้า',month:'March',hasBilling:false,billDate:'',billNo:'',billAmt:null,billStat:''},
+  ];
+  done([...new Set([...SEA,...AIR].map(r=>r.sheet))]);
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const pct=(n,d)=>d?(n/d*100).toFixed(1)+'%':'—';
+const f1=v=>(v===''||v===null||isNaN(v))?'—':Number(v).toFixed(1);
+const fmtB=v=>v==null?'—':v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const uniq=(a,k)=>[...new Set(a.map(r=>r[k]).filter(x=>x!==null&&x!==''&&x!==undefined))].sort();
+const MORD=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const sortM=arr=>[...arr].sort((a,b)=>MORD.indexOf(a)-MORD.indexOf(b));
+
+function initFilters(){
+  const all=[...SEA,...AIR];
+  const fill2=(id,items,ph)=>{const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=`<option value="">${ph}</option>`+items.map(v=>`<option value="${v}">${v}</option>`).join('');};
+  fill2('sf-sh',uniq(SEA,'sheet'),'📋 ทุก Sheet');
+  fill2('sf-cn',uniq(SEA,'consignee'),'🏢 ทุก Consignee');
+  fill2('sf-pv',uniq(SEA,'privilege').filter(Boolean),'🎖️ ทุก Privilege');
+  fill2('sf-fc',uniq(SEA,'fcl').filter(Boolean),'📦 FCL/LCL');
+  fill2('af-sh',uniq(AIR,'sheet'),'📋 ทุก Sheet');
+  fill2('af-cn',uniq(AIR,'consignee'),'🏢 ทุก Consignee');
+  fill2('af-pv',uniq(AIR,'privilege').filter(Boolean),'🎖️ ทุก Privilege');
+  fill2('cf-sel',uniq(all,'consignee'),'🏢 เลือก Consignee');
+  fill2('bf-sh',uniq(all,'sheet'),'📋 ทุก Sheet');
+  fill2('bf-cn',uniq(all,'consignee'),'🏢 ทุก Consignee');
+}
+
+function gf(mode){
+  const d=mode==='sea'?SEA:AIR, pfx=mode==='sea'?'sf':'af';
+  const sh=document.getElementById(pfx+'-sh')?.value||'';
+  const cn=document.getElementById(pfx+'-cn')?.value||'';
+  const pv=document.getElementById(pfx+'-pv')?.value||'';
+  const fc=mode==='sea'?(document.getElementById('sf-fc')?.value||''):'';
+  const js=document.getElementById(pfx+'-js')?.value||'';
+  return d.filter(r=>(!sh||r.sheet===sh)&&(!cn||r.consignee===cn)&&(!pv||r.privilege===pv)&&(!fc||r.fcl===fc)&&(!js||r.otd===js||r.jobStatus===js));
+}
+
+function otdBdg(s){
+  const m={'On Time':'bdg bgg','Delayed':'bdg brr','In Transit':'bdg bss','จบงานแล้ว':'bdg bpp','':"bdg bww"};
+  const ic={'On Time':'✓','Delayed':'!','In Transit':'↻','จบงานแล้ว':'✔','':"—"};
+  return `<span class="${m[s]||'bdg bww'}"><span style="font-size:9px">${ic[s]||'—'}</span> ${s||'—'}</span>`;
+}
+function jobBdg(s){
+  if(!s) return '<span style="color:var(--t4)">—</span>';
+  return `<span class="bdg bpp">✔ ${s}</span>`;
+}
+function chkCell(v){return(v===true||v==='TRUE'||v===1||v==='true')?'<span class="chk">✓</span>':'<span class="nchk">—</span>';}
+function respCell(v,d){
+  if(v===''||v===null||isNaN(v)) return '<span style="color:var(--t4)">—</span>';
+  const c=v<=3?'var(--grn)':v<=7?'var(--air)':'var(--red)';
+  const ds=d&&d>0?`<span style="color:var(--red);font-size:8.5px;margin-left:2px">+${d}d</span>`:'';
+  return `<span style="color:${c};font-family:var(--mono);font-size:10px">${v}d</span>${ds}`;
+}
+function invCell(v){
+  if(!v) return '<span style="color:var(--t4)">—</span>';
+  const parts=v.split('|').map(p=>p.trim()).filter(Boolean);
+  return parts.map(p=>`<span class="inv-txt" title="${v}">${p}</span>`).join('');
+}
+function billStatBdg(s){
+  if(!s) return '<span style="color:var(--t4)">—</span>';
+  const m={Paid:'bdg bgg',Unpaid:'bdg brr',Pending:'bdg bor'};
+  return `<span class="${m[s]||'bdg bww'}">${s}</span>`;
+}
+function hbars(items){
+  const mx=Math.max(...items.map(x=>x.v).filter(v=>v!==''&&!isNaN(v)),1);
+  return items.map(x=>{
+    const w=(!isNaN(x.v)&&x.v!=='')?Math.min(100,(x.v/(x.max||mx))*100):0;
+    return `<div class="hbr"><div class="hbl" title="${x.l}">${x.l}</div>
+      <div class="hbt"><div class="hbf" style="width:${w}%;background:${x.c}"></div></div>
+      <div class="hbv">${x.vl}</div></div>`;
+  }).join('');
+}
+function nod(t='ไม่มีข้อมูล'){return`<div style="color:var(--t3);font-size:11px;padding:20px;text-align:center">${t}</div>`;}
+function donut(p,c1,c2,lbl,sub){
+  const T=238.8,a=(p/100)*T;
+  return `<svg width="105" height="105" viewBox="0 0 110 110">
+    <circle cx="55" cy="55" r="38" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="13"/>
+    <circle cx="55" cy="55" r="38" fill="none" stroke="${c1}" stroke-width="13"
+      stroke-dasharray="${a} ${T}" stroke-linecap="round" transform="rotate(-90 55 55)"/>
+    <circle cx="55" cy="55" r="38" fill="none" stroke="${c2}" stroke-width="13"
+      stroke-dasharray="${T-a} ${T}" stroke-dashoffset="-${a+1}" stroke-linecap="round" transform="rotate(-90 55 55)"/>
+    <text x="55" y="50" text-anchor="middle" font-family="Chakra Petch" font-size="15" font-weight="700" fill="var(--txt)">${lbl}</text>
+    <text x="55" y="62" text-anchor="middle" font-size="9" fill="var(--t2)">${sub}</text></svg>`;
+}
+function gauge(p,c,lbl,sub){
+  const pp=Math.min(p,99.9),a=(pp/100)*180,r=50,cx=65,cy=80;
+  const rad=(a-180)*Math.PI/180,ex=cx+r*Math.cos(rad),ey=cy+r*Math.sin(rad),lg=a>180?1:0;
+  return `<svg width="128" height="86" viewBox="0 0 130 90">
+    <path d="M15 80 A50 50 0 0 1 115 80" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="11" stroke-linecap="round"/>
+    <path d="M15 80 A50 50 0 0 1 86 32" fill="none" stroke="rgba(245,166,35,.3)" stroke-width="11" stroke-linecap="round" stroke-dasharray="5 4"/>
+    <path d="M15 80 A50 50 0 ${lg} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="${c}" stroke-width="11" stroke-linecap="round"/>
+    <text x="65" y="71" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" font-weight="600" fill="${c}">${lbl}</text>
+    <text x="65" y="82" text-anchor="middle" font-size="8.5" fill="var(--t3)">${sub}</text></svg>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════
+function renderAll(){renderSum();renderSea();renderAir();renderCN();renderBilling();renderAlerts();}
+
+// ── SUMMARY ─────────────────────────
+function renderSum(){
+  const all=[...SEA,...AIR];
+  const c=arr=>({
+    n:arr.length,
+    ot:arr.filter(r=>r.otd==='On Time').length,
+    dl:arr.filter(r=>r.otd==='Delayed').length,
+    it:arr.filter(r=>r.otd==='In Transit').length,
+    dn:arr.filter(r=>r.jobStatus==='จบงานแล้ว').length,
+    ra:avg(arr.map(r=>r.resp).filter(v=>v!==''&&!isNaN(v)&&v!==null))
+  });
+  const S=c(SEA),A=c(AIR),T=c(all);
+  const op=T.n?(T.ot/T.n*100).toFixed(1):'0';
+
+  document.getElementById('h-tot').textContent=T.n;
+  document.getElementById('h-otd').textContent=pct(T.ot,T.n);
+  document.getElementById('h-done').textContent=T.dn;
+  document.getElementById('h-it').textContent=T.it;
+  document.getElementById('h-dl').textContent=T.dl;
+
+  const vsItem=(v,l,c)=>`<div class="vsi"><div class="vsv" style="color:${c}">${v}</div><div class="vsl">${l}</div></div>`;
+  document.getElementById('vs').innerHTML=`
+    <div class="vss"><div class="vsm s">🚢 Sea</div><div class="vsit">
+      ${vsItem(S.n,'Cases','var(--sea)')}${vsItem(pct(S.ot,S.n),'OTD','var(--grn)')}
+      ${vsItem(S.dn,'จบงาน','var(--pur)')}${vsItem(S.it,'Transit','var(--air)')}
+      ${vsItem(S.dl,'Delayed',S.dl===0?'var(--grn)':'var(--red)')}
+      ${vsItem(f1(S.ra)+'d','Avg Resp',S.ra<=7?'var(--sea)':'var(--air)')}
+    </div></div>
+    <div class="vsd"></div><div class="vsv2">VS</div><div class="vsd"></div>
+    <div class="vss"><div class="vsm a">✈️ Air</div><div class="vsit">
+      ${vsItem(A.n,'Cases','var(--air)')}${vsItem(pct(A.ot,A.n),'OTD',A.n&&A.ot/A.n>=.85?'var(--grn)':'var(--red)')}
+      ${vsItem(A.dn,'จบงาน','var(--pur)')}${vsItem(A.it,'Transit','var(--air)')}
+      ${vsItem(A.dl,'Delayed',A.dl===0?'var(--grn)':'var(--red)')}
+      ${vsItem(f1(A.ra)+'d','Avg Resp',A.ra<=5?'var(--sea)':'var(--air)')}
+    </div></div>`;
+
+  document.getElementById('sum-kpi').innerHTML=`
+    <div class="kc kcs"><div class="kl">📦 Total</div><div class="kv">${T.n}<span class="ku">cases</span></div><div class="ks2 ok">Sea:${S.n} Air:${A.n}</div></div>
+    <div class="kc kcg"><div class="kl">🎯 OTD Rate</div><div class="kv">${op}<span class="ku">%</span></div><div class="ks2 ${op>=85?'up':'dn'}">${op>=85?'▲ ≥85%':'▼ <85%'}</div></div>
+    <div class="kc kcp"><div class="kl">✔️ จบงานแล้ว</div><div class="kv">${T.dn}<span class="ku">cases</span></div><div class="ks2 pp">${T.n?Math.round(T.dn/T.n*100):0}% complete</div></div>
+    <div class="kc kcw"><div class="kl">⏳ In Transit</div><div class="kv">${T.it}<span class="ku">cases</span></div></div>
+    <div class="kc kcr"><div class="kl">🚨 Delayed</div><div class="kv">${T.dl}<span class="ku">cases</span></div><div class="ks2 ${T.dl===0?'up':'dn'}">${T.dl===0?'✓ ดีมาก':'⚠ ดูแล'}</div></div>`;
+
+  document.getElementById('al-bdg').textContent=T.dl>0?T.dl:'';
+
+  const months=sortM(uniq(all,'month').filter(Boolean));
+  const sv=months.map(m=>SEA.filter(r=>r.month===m).length);
+  const av2=months.map(m=>AIR.filter(r=>r.month===m).length);
+  const mx2=Math.max(...sv,...av2,1);
+  const bars=months.map((m,i)=>`
+    <div class="bar bs" style="height:${Math.max(5,(sv[i]/mx2)*100)}%" data-tip="${m.slice(0,3)} Sea:${sv[i]}"></div>
+    <div class="bar ba" style="height:${Math.max(5,(av2[i]/mx2)*100)}%" data-tip="${m.slice(0,3)} Air:${av2[i]}"></div>`).join('');
+  const lbls=months.map(m=>`<span class="bclbl">${m.slice(0,3)}</span><span class="bclbl"></span>`).join('');
+  const sp=T.n?Math.round(S.n/T.n*100):50;
+  const mxO=Math.max(T.ot,T.dl,T.it,T.dn,1);
+  const obars=[['On Time',T.ot,'bg'],['Delayed',T.dl,'br'],['Transit',T.it,'bgr'],['จบงาน',T.dn,'bp']].map(
+    ([l,v,cls])=>`<div class="bar ${cls}" style="height:${Math.max(5,(v/mxO)*100)}%" data-tip="${l}:${v}"></div>`).join('');
+
+  document.getElementById('sum-ch1').innerHTML=`
+    <div class="cc"><div class="cct">Volume รายเดือน</div><div class="ccs">Sea vs Air</div>
+      <div class="bch">${bars||nod('ไม่มีข้อมูลเดือน')}</div><div class="bclbls">${lbls}</div>
+      <div class="leg"><div class="li"><div class="ld" style="background:var(--sea)"></div>Sea</div><div class="li"><div class="ld" style="background:var(--air)"></div>Air</div></div></div>
+    <div class="cc"><div class="cct">Mode Split</div><div class="ccs">Sea vs Air %</div>
+      <div class="dw">${donut(sp,'var(--sea)','var(--air)',sp+'%','Sea')}</div></div>
+    <div class="cc"><div class="cct">Status Mix</div><div class="ccs">Overall</div>
+      <div class="bch" style="gap:12px">${obars}</div>
+      <div class="bclbls"><span class="bclbl">OnTime</span><span class="bclbl">Delayed</span><span class="bclbl">Transit</span><span class="bclbl">จบงาน</span></div></div>`;
+
+  const conV=uniq(all,'consignee').map(cn=>({l:cn,v:all.filter(r=>r.consignee===cn).length,c:'var(--sea)',vl:''}))
+    .sort((a,b)=>b.v-a.v).slice(0,7).map(x=>({...x,vl:`${x.v} cases`}));
+  const privV=uniq(all,'privilege').filter(Boolean).map(p=>({l:p,v:all.filter(r=>r.privilege===p).length,c:'var(--air)',vl:''}))
+    .sort((a,b)=>b.v-a.v).map(x=>({...x,vl:`${x.v} cases`}));
+
+  document.getElementById('sum-ch2').innerHTML=`
+    <div class="cc"><div class="cct">Volume by Consignee</div><div class="ccs">Sea + Air</div>${conV.length?hbars(conV):nod()}</div>
+    <div class="cc"><div class="cct">Privilege Mix</div><div class="ccs">PREVILLAGE</div>${privV.length?hbars(privV):nod()}</div>`;
+}
+
+// ── SEA / AIR SHARED ─────────────────
+function modeKPI(rows,mode){
+  const ot=rows.filter(r=>r.otd==='On Time'),dl=rows.filter(r=>r.otd==='Delayed');
+  const it=rows.filter(r=>r.otd==='In Transit'),dn=rows.filter(r=>r.jobStatus==='จบงานแล้ว');
+  const ra=rows.map(r=>r.resp).filter(v=>v!==''&&!isNaN(v)&&v!==null);
+  const op=rows.length?(ot.length/rows.length*100).toFixed(1):'0';
+  const isSea=mode==='sea', cls=isSea?'kcs':'kca', c=isSea?'var(--sea)':'var(--air)';
+  return `
+    <div class="kc ${cls}"><div class="kl">${isSea?'🚢 Sea':'✈️ Air'} Cases</div><div class="kv">${rows.length}<span class="ku">cases</span></div><div class="ks2 ok">${[...new Set(rows.map(r=>r.sheet))].length} Sheet</div></div>
+    <div class="kc kcg"><div class="kl">🎯 OTD Rate</div><div class="kv">${op}<span class="ku">%</span></div><div class="ks2 ${op>=85?'up':'dn'}">${op>=85?'▲ ≥85%':'▼ <85%'}</div></div>
+    <div class="kc kcp"><div class="kl">✔️ จบงานแล้ว</div><div class="kv">${dn.length}<span class="ku">cases</span></div><div class="ks2 pp">${rows.length?Math.round(dn.length/rows.length*100):0}%</div></div>
+    <div class="kc kcw"><div class="kl">⏳ In Transit</div><div class="kv">${it.length}<span class="ku">cases</span></div></div>
+    <div class="kc kcr"><div class="kl">🚨 Delayed</div><div class="kv">${dl.length}<span class="ku">cases</span></div><div class="ks2 ${dl.length===0?'up':'dn'}">${dl.length===0?'✓':'⚠'}</div></div>
+    <div class="kc kcw"><div class="kl">⏱️ Avg Resp</div><div class="kv">${f1(avg(ra))}<span class="ku">d</span></div><div class="ks2 ${avg(ra)<=(isSea?7:5)||!ra.length?'ok':'wn'}">${avg(ra)<=(isSea?7:5)||!ra.length?'✓ OK':'Review'}</div></div>`;
+}
+function modeCharts(mode, rows, c){
+  const ot=rows.filter(r=>r.otd==='On Time'),dl=rows.filter(r=>r.otd==='Delayed'),it=rows.filter(r=>r.otd==='In Transit');
+  const isSea=mode==='sea', op=rows.length?(ot.length/rows.length*100).toFixed(1):'0';
+  const months=sortM(uniq(rows,'month').filter(Boolean));
+  const vols=months.map(m=>rows.filter(r=>r.month===m).length);
+  const mx=Math.max(...vols,1);
+  const bars=vols.map((v,i)=>`<div class="bar ${isSea?'bs':'ba'}" style="height:${Math.max(5,(v/mx)*100)}%" data-tip="${months[i].slice(0,3)}:${v}"></div>`).join('');
+  const lbls=months.map(m=>`<span class="bclbl">${m.slice(0,3)}</span>`).join('');
+  document.getElementById(`${mode}-ch1`).innerHTML=`
+    <div class="cc"><div class="cct">Volume รายเดือน</div><div class="ccs">cases</div>
+      <div class="bch">${bars||nod('ไม่มีข้อมูลเดือน')}</div><div class="bclbls">${lbls}</div></div>
+    <div class="cc"><div class="cct">OTD Mix</div><div class="ccs">สัดส่วน</div>
+      <div class="dw">${donut(Number(op),'var(--grn)','var(--red)',op+'%','On Time')}</div></div>
+    <div class="cc"><div class="cct">OTD Gauge</div><div class="ccs">vs 85% target</div>
+      <div class="gw">${gauge(Number(op),Number(op)>=85?c:'var(--red)',op+'%',Number(op)>=85?'✓ Target':'⚠ Below 85%')}</div></div>`;
+  const conV=uniq(rows,'consignee').map(cn=>{
+    const cr=rows.filter(r=>r.consignee===cn);
+    return{l:cn,v:cr.length,c,vl:`${cr.length} | OTD ${cr.length?(cr.filter(r=>r.otd==='On Time').length/cr.length*100).toFixed(0):0}%`};
+  }).sort((a,b)=>b.v-a.v).slice(0,7);
+  const privD=uniq(rows,'privilege').filter(Boolean).map(p=>({l:p,v:rows.filter(r=>r.privilege===p).length,c:'var(--air)',vl:`${rows.filter(r=>r.privilege===p).length}`}));
+  document.getElementById(`${mode}-ch2`).innerHTML=`
+    <div class="cc"><div class="cct">Volume by Consignee</div><div class="ccs">ยอด + OTD %</div>${conV.length?hbars(conV):nod()}</div>
+    <div class="cc"><div class="cct">Privilege Mix</div><div class="ccs">PREVILLAGE</div>${privD.length?hbars(privD):nod()}</div>`;
+}
+
+// ── SEA ──────────────────────────────
+function renderSea(){
+  const rows=gf('sea');
+  document.getElementById('sea-n').textContent=`${rows.length} cases`;
+  document.getElementById('sea-tn').textContent=`แสดง ${Math.min(rows.length,200)}/${rows.length}`;
+  document.getElementById('sea-kpi').innerHTML=modeKPI(rows,'sea');
+  modeCharts('sea',rows,'var(--sea)');
+  document.getElementById('sea-tb').innerHTML=rows.slice(0,200).map(r=>`<tr>
+    <td><span class="mtg mts">${r.sheet}</span></td>
+    <td style="font-weight:600;color:var(--txt);white-space:nowrap;min-width:90px">${r.consignee}</td>
+    <td style="color:var(--t2);font-size:10px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.shipper}</td>
+    <td class="mono" style="color:var(--sea);white-space:nowrap">${r.pol}→${r.pod}</td>
+    <td><span class="bdg bww">${r.fcl||'—'}</span></td>
+    <td class="mono">${r.etd||'—'}</td><td class="mono">${r.eta||'—'}</td><td class="mono">${r.ata||'—'}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.vessel||'—'}</td>
+    <td style="min-width:110px">${invCell(r.inv)}</td>
+    <td><span class="bdg baa">${r.privilege||'—'}</span></td>
+    <td class="mono">${r.rcv||'—'}</td><td class="mono">${r.clear||'—'}</td>
+    <td>${otdBdg(r.otd)}</td>
+    <td>${jobBdg(r.jobStatus)}</td>
+    <td>${respCell(r.resp,r.delay)}</td>
+    <td class="mono" style="color:${r.delay>0?'var(--red)':'var(--t4)'}">${r.delay===''||r.delay===0?'—':r.delay+'d'}</td>
+    <td>${chkCell(r.f)}</td><td>${chkCell(r.s)}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.remarks}">${r.remarks||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── AIR ──────────────────────────────
+function renderAir(){
+  const rows=gf('air');
+  const dl=rows.filter(r=>r.otd==='Delayed');
+  document.getElementById('air-bdg').textContent=dl.length>0?dl.length:'';
+  document.getElementById('al-bdg').textContent=[...SEA,...AIR].filter(r=>r.otd==='Delayed').length||'';
+  const db=document.getElementById('dl-btn');
+  if(dl.length>0){db.style.display='';db.textContent=`⚠️ ${dl.length} Delayed`;}else db.style.display='none';
+  document.getElementById('air-n').textContent=`${rows.length} cases`;
+  document.getElementById('air-tn').textContent=`แสดง ${Math.min(rows.length,200)}/${rows.length}`;
+  document.getElementById('air-kpi').innerHTML=modeKPI(rows,'air');
+  modeCharts('air',rows,'var(--air)');
+  document.getElementById('air-tb').innerHTML=rows.slice(0,200).map(r=>`<tr>
+    <td><span class="mtg mta">${r.sheet}</span></td>
+    <td style="font-weight:600;color:var(--txt);white-space:nowrap;min-width:80px">${r.consignee}</td>
+    <td style="color:var(--t2);font-size:10px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.shipper}</td>
+    <td class="mono" style="color:var(--air);white-space:nowrap">${r.pol}→${r.pod}</td>
+    <td class="mono">${r.etd||'—'}</td><td class="mono">${r.ata||r.eta||'—'}</td>
+    <td class="mono">${r.vessel||'—'}</td>
+    <td style="min-width:110px">${invCell(r.inv)}</td>
+    <td><span class="bdg baa">${r.privilege||'—'}</span></td>
+    <td class="mono">${r.rcv||'—'}</td><td class="mono">${r.clear||'—'}</td>
+    <td>${otdBdg(r.otd)}</td>
+    <td>${jobBdg(r.jobStatus)}</td>
+    <td>${respCell(r.resp,r.delay)}</td>
+    <td class="mono" style="color:${r.delay>0?'var(--red)':'var(--t4)'}">${r.delay===''||r.delay===0?'—':r.delay+'d'}</td>
+    <td>${chkCell(r.f)}</td><td>${chkCell(r.s)}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.remarks}">${r.remarks||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── CONSIGNEE ────────────────────────
+function renderCN(){
+  const all=[...SEA,...AIR];
+  const sel=document.getElementById('cf-sel').value;
+  const ranking=uniq(all,'consignee').map(cn=>{
+    const rows=all.filter(r=>r.consignee===cn);
+    const ot=rows.filter(r=>r.otd==='On Time').length;
+    return{cn,sea:SEA.filter(r=>r.consignee===cn).length,air:AIR.filter(r=>r.consignee===cn).length,
+      total:rows.length,ot,otP:rows.length?(ot/rows.length*100).toFixed(0):0};
+  }).sort((a,b)=>b.total-a.total);
+  const maxV=Math.max(...ranking.map(x=>x.total),1);
+  const rankH=ranking.slice(0,10).map(x=>`<div class="hbr">
+    <div class="hbl" title="${x.cn}">${x.cn}</div>
+    <div class="hbt"><div class="hbf" style="width:${(x.total/maxV)*100}%;background:linear-gradient(90deg,var(--sea),var(--air))"></div></div>
+    <div class="hbv" style="font-size:9.5px;width:150px">S:${x.sea} A:${x.air} OTD:${x.otP}%</div></div>`).join('');
+  const atRisk=ranking.filter(x=>parseInt(x.otP)<85&&x.total>0).map(x=>({l:x.cn,v:100-parseInt(x.otP),max:100,c:'var(--red)',vl:`OTD ${x.otP}% (${x.total})`}));
+  document.getElementById('cn-rank').innerHTML=`
+    <div class="cc"><div class="cct">Volume Ranking</div><div class="ccs">Sea + Air</div>${rankH||nod()}</div>
+    <div class="cc"><div class="cct">OTD Below 85%</div><div class="ccs">ต้องติดตาม</div>${atRisk.length?hbars(atRisk):'<div style="color:var(--grn);padding:20px;text-align:center;font-size:12px">✅ ทุก Consignee OTD ≥ 85%</div>'}</div>`;
+  if(!sel){
+    document.getElementById('cn-kpi').innerHTML='<div style="color:var(--t3);font-size:11px;grid-column:span 4;padding:15px;text-align:center">เลือก Consignee เพื่อดูรายละเอียด</div>';
+    document.getElementById('cn-tb').innerHTML='';
+    document.getElementById('cn-title').textContent='เลือก Consignee ด้านบน';
+    return;
+  }
+  const rows=all.filter(r=>r.consignee===sel);
+  const ot=rows.filter(r=>r.otd==='On Time'),dl=rows.filter(r=>r.otd==='Delayed');
+  const dn=rows.filter(r=>r.jobStatus==='จบงานแล้ว');
+  const ra=rows.map(r=>r.resp).filter(v=>v!==''&&!isNaN(v)&&v!==null);
+  const op=rows.length?(ot.length/rows.length*100).toFixed(1):'0';
+  document.getElementById('cn-title').textContent=`${sel} — ${rows.length} Shipments`;
+  document.getElementById('cn-kpi').innerHTML=`
+    <div class="kc kcs"><div class="kl">📦 Total</div><div class="kv">${rows.length}<span class="ku">cases</span></div><div class="ks2 ok">S:${rows.filter(r=>r.mode==='SEA').length} A:${rows.filter(r=>r.mode==='AIR').length}</div></div>
+    <div class="kc kcg"><div class="kl">🎯 OTD</div><div class="kv">${op}<span class="ku">%</span></div><div class="ks2 ${op>=85?'up':'dn'}">${op>=85?'✓':'▼ Below 85%'}</div></div>
+    <div class="kc kcp"><div class="kl">✔️ จบงาน</div><div class="kv">${dn.length}<span class="ku">cases</span></div></div>
+    <div class="kc kcr"><div class="kl">🚨 Delayed</div><div class="kv">${dl.length}<span class="ku">cases</span></div></div>`;
+  document.getElementById('cn-tb').innerHTML=rows.map(r=>`<tr>
+    <td><span class="mtg ${r.mode==='SEA'?'mts':'mta'}">${r.sheet}</span></td>
+    <td><span class="mtg ${r.mode==='SEA'?'mts':'mta'}">${r.mode}</span></td>
+    <td style="color:var(--t2);font-size:10px">${r.shipper}</td>
+    <td class="mono">${r.pol}→${r.pod}</td>
+    <td><span class="bdg bww">${r.fcl||'—'}</span></td>
+    <td class="mono">${r.etd||'—'}</td><td class="mono">${r.ata||r.eta||'—'}</td>
+    <td style="min-width:100px">${invCell(r.inv)}</td>
+    <td><span class="bdg baa">${r.privilege||'—'}</span></td>
+    <td>${otdBdg(r.otd)}</td><td>${jobBdg(r.jobStatus)}</td>
+    <td>${respCell(r.resp,r.delay)}</td>
+    <td class="mono" style="color:${r.delay>0?'var(--red)':'var(--t4)'}">${r.delay===''||r.delay===0?'—':r.delay+'d'}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:130px" title="${r.remarks}">${r.remarks||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── BILLING ──────────────────────────
+function renderBilling(){
+  const all=[...SEA,...AIR];
+  const sh=document.getElementById('bf-sh')?.value||'';
+  const cn=document.getElementById('bf-cn')?.value||'';
+  const st=document.getElementById('bf-st')?.value||'';
+  const billed=all.filter(r=>r.hasBilling||r.billStat);
+  const filtered=billed.filter(r=>(!sh||r.sheet===sh)&&(!cn||r.consignee===cn)&&(!st||r.billStat===st));
+
+  const totalAmt=billed.reduce((s,r)=>s+(r.billAmt||0),0);
+  const paidAmt=billed.filter(r=>r.billStat==='Paid').reduce((s,r)=>s+(r.billAmt||0),0);
+  const unpaidAmt=billed.filter(r=>r.billStat==='Unpaid').reduce((s,r)=>s+(r.billAmt||0),0);
+  const pendAmt=billed.filter(r=>r.billStat==='Pending').reduce((s,r)=>s+(r.billAmt||0),0);
+  const paidN=billed.filter(r=>r.billStat==='Paid').length;
+  const unpaidN=billed.filter(r=>r.billStat==='Unpaid').length;
+  const pendN=billed.filter(r=>r.billStat==='Pending').length;
+
+  document.getElementById('bill-n').textContent=`${filtered.length} / ${billed.length} บิล`;
+  document.getElementById('bill-tm').textContent=`กรองแล้ว ${filtered.length} รายการ`;
+
+  if(!billed.length){
+    document.getElementById('bill-kpi').innerHTML='<div style="color:var(--t3);font-size:11.5px;grid-column:span 4;padding:20px;text-align:center">ยังไม่มีข้อมูล Billing — กรุณากรอกในไฟล์ Excel Enhanced แล้วโหลดใหม่</div>';
+    document.getElementById('bill-charts').innerHTML='';
+    document.getElementById('bill-tb').innerHTML='';
+    return;
+  }
+
+  const paidPct=totalAmt>0?(paidAmt/totalAmt*100).toFixed(0):0;
+  document.getElementById('bill-kpi').innerHTML=`
+    <div class="kc kcb"><div class="kl">💰 Total Billed</div><div class="kv">${billed.length}<span class="ku">cases</span></div><div class="ks2 ok">THB ${fmtB(totalAmt)}</div></div>
+    <div class="kc kcg"><div class="kl">✅ Paid</div><div class="kv">${paidN}<span class="ku">cases</span></div><div class="ks2 up">THB ${fmtB(paidAmt)}</div></div>
+    <div class="kc kcr"><div class="kl">❌ Unpaid</div><div class="kv">${unpaidN}<span class="ku">cases</span></div><div class="ks2 dn">THB ${fmtB(unpaidAmt)}</div></div>
+    <div class="kc kca"><div class="kl">⏳ Pending</div><div class="kv">${pendN}<span class="ku">cases</span></div><div class="ks2 wn">THB ${fmtB(pendAmt)}</div></div>`;
+
+  // Charts
+  const mxB=Math.max(paidN,unpaidN,pendN,1);
+  const bBars=[['Paid',paidN,'bg'],['Unpaid',unpaidN,'br'],['Pending',pendN,'ba']].map(
+    ([l,v,cls])=>`<div class="bar ${cls}" style="height:${Math.max(5,(v/mxB)*100)}%" data-tip="${l}:${v}"></div>`).join('');
+  // per-consignee
+  const cnBill=uniq(billed,'consignee').map(c=>{
+    const cr=billed.filter(r=>r.consignee===c);
+    const amt=cr.reduce((s,r)=>s+(r.billAmt||0),0);
+    return{l:c,v:amt,c:'var(--blu)',vl:`THB ${fmtB(amt)}`};
+  }).sort((a,b)=>b.v-a.v).slice(0,6);
+
+  document.getElementById('bill-charts').innerHTML=`
+    <div class="cc">
+      <div class="cct">Payment Status</div><div class="ccs">จำนวนบิล</div>
+      <div class="bch" style="gap:18px">${bBars}</div>
+      <div class="bclbls"><span class="bclbl">Paid</span><span class="bclbl">Unpaid</span><span class="bclbl">Pending</span></div>
+      <div style="margin-top:12px">
+        <div class="amt-lbl">Outstanding Amount</div>
+        <div class="amt-val" style="color:${unpaidAmt+pendAmt>0?'var(--red)':'var(--grn)'}">THB ${fmtB(unpaidAmt+pendAmt)}</div>
+        <div class="bill-stat-bar"><div class="bill-stat-fill" style="width:${paidPct}%;background:var(--grn)"></div></div>
+        <div style="font-size:9.5px;color:var(--t2);margin-top:3px">${paidPct}% Collected · THB ${fmtB(paidAmt)} / ${fmtB(totalAmt)}</div>
+      </div>
+    </div>
+    <div class="cc"><div class="cct">Amount by Consignee</div><div class="ccs">THB รวม</div>${cnBill.length?hbars(cnBill):nod()}</div>`;
+
+  document.getElementById('bill-tb').innerHTML=filtered.map(r=>`<tr>
+    <td><span class="mtg ${r.mode==='SEA'?'mts':'mta'}">${r.sheet}</span></td>
+    <td><span class="mtg ${r.mode==='SEA'?'mts':'mta'}">${r.mode}</span></td>
+    <td style="font-weight:600;color:var(--txt);white-space:nowrap">${r.consignee}</td>
+    <td style="min-width:100px">${invCell(r.inv)}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.vessel||'—'}</td>
+    <td class="mono">${r.billDate||'—'}</td>
+    <td class="mono">${r.billNo||'—'}</td>
+    <td class="mono" style="color:${r.billAmt?'var(--txt)':'var(--t4)'}${r.billAmt?';font-weight:600':''}">${r.billAmt!=null?'฿'+fmtB(r.billAmt):'—'}</td>
+    <td>${billStatBdg(r.billStat)}</td>
+    <td style="font-size:9.5px;color:var(--t2);max-width:120px;overflow:hidden;text-overflow:ellipsis" title="${r.remarks}">${r.remarks||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── ALERTS ───────────────────────────
+function renderAlerts(){
+  const all=[...SEA,...AIR];
+  const delayed=all.filter(r=>r.otd==='Delayed');
+  const transit=all.filter(r=>r.otd==='In Transit');
+  const highResp=all.filter(r=>r.resp!==''&&!isNaN(r.resp)&&r.resp>10);
+  const unpaid=all.filter(r=>r.billStat==='Unpaid');
+  let html='';
+
+  if(delayed.length){
+    html+=sec('🚨 Delayed Cases','var(--red)',delayed.length);
+    html+=delayed.map(r=>alert2('var(--red)','🚨',
+      `<strong>${r.consignee}</strong> · ${r.sheet} · ${r.mode} — ${r.pol}→${r.pod}`,
+      `Vessel: ${r.vessel||'—'} · ETA: ${r.eta||'—'} · ATA: ${r.ata||'—'} · Delay: ${r.delay>0?r.delay+'d':'?'} · INV: ${r.inv||'—'}`)).join('');
+  }
+  if(highResp.length){
+    html+=sec('⏱️ Response Time สูง >10 วัน','var(--air)',highResp.length);
+    html+=highResp.map(r=>alert2('var(--air)','⏱️',
+      `<strong>${r.consignee}</strong> · ${r.sheet} — Resp: <strong style="color:var(--air)">${r.resp} วัน</strong>`,
+      `RCV: ${r.rcv||'—'} → Clear: ${r.clear||'—'} · ${r.remarks||''}`)).join('');
+  }
+  if(unpaid.length){
+    html+=sec('💸 Unpaid Billing','var(--red)',unpaid.length);
+    html+=unpaid.map(r=>alert2('var(--red)','💸',
+      `<strong>${r.consignee}</strong> · ${r.sheet} · BillingNo: ${r.billNo||'—'}`,
+      `Amount: THB ${fmtB(r.billAmt)} · Date: ${r.billDate||'—'} · INV: ${r.inv||'—'}`)).join('');
+  }
+  if(transit.length){
+    html+=sec('⏳ In Transit','var(--sea)',transit.length);
+    html+=transit.map(r=>alert2('rgba(0,212,184,.12)','⏳',
+      `<strong>${r.consignee}</strong> · ${r.sheet} · ${r.mode} — ${r.pol}→${r.pod}`,
+      `Vessel/Flight: ${r.vessel||'—'} · ETD: ${r.etd||'—'} · ETA: ${r.eta||'—'}`,'rgba(0,212,184,.25)')).join('');
+  }
+  if(!html) html=`<div style="color:var(--grn);font-size:14px;padding:50px;text-align:center">✅ ไม่มีรายการที่ต้องติดตาม</div>`;
+  document.getElementById('alert-body').innerHTML=html;
+}
+function sec(lbl,c,n){return`<div class="sec" style="margin-top:14px"><div class="pip w" style="background:${c};box-shadow:0 0 7px ${c}"></div><div class="slbl">${lbl} (${n})</div><div class="sln"></div></div>`;}
+function alert2(bg,ic,tx,sub,bc='rgba(255,69,96,.22)'){
+  return`<div class="alert" style="background:${bg};border-color:${bc}"><span class="alert-ic">${ic}</span><div><div class="alert-tx">${tx}</div><div class="alert-sub">${sub}</div></div></div>`;
+}
+
+// ── NAV ──────────────────────────────
+function goPage(name,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('ta','ts','tai','tp','tb2'));
+  document.getElementById('pg-'+name).classList.add('on');
+  const cls={sum:'ta',sea:'ts',air:'tai',cn:'ta',billing:'tb2',alert:'ta'};
+  el.classList.add(cls[name]||'ta');
+}
+
+// ── EXPORT ───────────────────────────
+function exportCSV(mode){
+  const rows=mode==='SEA'?SEA:AIR;
+  if(!rows.length)return;
+  const keys=Object.keys(rows[0]);
+  const csv=[keys.join(','),...rows.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+  dl2csv(csv,`CS_${mode}_${new Date().toISOString().slice(0,10)}.csv`);
+}
+function exportBillingCSV(){
+  const all=[...SEA,...AIR].filter(r=>r.hasBilling||r.billStat);
+  if(!all.length)return;
+  const keys=['sheet','mode','consignee','inv','vessel','billDate','billNo','billAmt','billStat','remarks'];
+  const csv=[keys.join(','),...all.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+  dl2csv(csv,`CS_Billing_${new Date().toISOString().slice(0,10)}.csv`);
+}
+function dl2csv(csv,fn){
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=fn; a.click();
+}
+
+// Drag & drop
+const uz=document.getElementById('uz');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)loadFile({target:{files:[f]}});});
+</script>
+</body>
+</html>
